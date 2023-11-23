@@ -22,4 +22,10 @@
         android:layout_height="wrap_content"
         android:icon="@drawable/openai_logo_icon_248315"
         android:title="Logo" />
+    <item
+        android:id="@+id/botonMario"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/mario_super_bros_icon_232936"
+        android:title="Mario" />
 </menu>

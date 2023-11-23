@@ -1,10 +1,12 @@
 package com.example.ejerciciotwoface
 
 
-import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -17,7 +19,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var adaptador: Adaptador = Adaptador(this)
     private var pareja: Carta? = null
-    private var MAXIMO_INTENTOS : Int=2
+    private var MAXIMO_INTENTOS : Int=5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,8 +55,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 finish()
                 true
             }
-            R.id.botonRestart -> {
-
+            R.id.botonMenu -> {
                     findViewById<DrawerLayout>(R.id.drawer_layout).openDrawer(GravityCompat.START)
                 true
             }
@@ -64,44 +65,33 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-             com.example.ejerciciotwoface.R.id.botonAnimal -> {
-                adaptador.setAnimal()
-                 Toast.makeText(this, "Animal", Toast.LENGTH_SHORT).show()
-                 findViewById<DrawerLayout>(R.id.drawer_layout).closeDrawer(GravityCompat.START)
-                true
-            }
-            R.id.botonComida -> {
-                adaptador.setComida()
-                Toast.makeText(this, "Comida", Toast.LENGTH_SHORT).show()
-                findViewById<DrawerLayout>(R.id.drawer_layout).closeDrawer(GravityCompat.START)
-                true
-            }
-            R.id.boton_reiniciar -> {
-                adaptador.reiniciar()
-                findViewById<DrawerLayout>(R.id.drawer_layout).closeDrawer(GravityCompat.START)
-                true
-            }
-            R.id.botonLogo -> {
-                adaptador.setMarcas()
-                Toast.makeText(this, "Logo", Toast.LENGTH_SHORT).show()
-                findViewById<DrawerLayout>(R.id.drawer_layout).closeDrawer(GravityCompat.START)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+        // una map de boton y su nombre
+        val map = mapOf(
+            R.id.botonAnimal to "Animal",
+            R.id.botonComida to "Comida",
+            R.id.botonLogo to "Logo",
+            R.id.botonMario to "Mario",
+            R.id.boton_reiniciar to "Reiniciar"
+        )
+        if(map[item.itemId] == null){
+            return super.onOptionsItemSelected(item)
+        }else {
+            adaptador.setData(map[item.itemId]!!)
+            findViewById<TextView>(R.id.textvida).text = "Vida: ${MAXIMO_INTENTOS-adaptador.getIntento()}"
+            Toast.makeText(this, map[item.itemId], Toast.LENGTH_SHORT).show()
+            findViewById<DrawerLayout>(R.id.drawer_layout).closeDrawer(GravityCompat.START)
+            return true
         }
+
     }
 
 
 
-    @SuppressLint("SuspiciousIndentation")
     override fun onCartaClick(position: Int) {
-        val cartaClickeada = adaptador.getItem(position)
+        if(adaptador.getIntento()<MAXIMO_INTENTOS){
+            val cartaClickeada = adaptador.getItem(position)
 
-        if(adaptador.getIntento()>=MAXIMO_INTENTOS){
-            Toast.makeText(this, "Perdiste", Toast.LENGTH_SHORT).show()
-            adaptador.reiniciar()
-        }else{
+
             if(pareja==null){
                 pareja=cartaClickeada
                 pareja!!.setActivo(true)
@@ -113,26 +103,29 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     checkWin()
                     pareja=null
                 }else{
-                    //suma intento metodo
                     adaptador.sumarIntento()
-                    pareja!!.setActivo(false)
-                    cartaClickeada.setActivo(true)
 
-                    /**
-                     *                     cartaClickeada.setActivo(true)
-                     *                     adaptador.notifyDataSetChanged()
-                     *                     //espera 1 segundo
-                     *                     Thread.sleep(1000)
-                     *                     //desactiva
-                     *                     cartaClickeada.setActivo(false)
-                     *                     pareja!!.setActivo(false)
-                     */
-                    pareja=cartaClickeada
+                    findViewById<TextView>(R.id.textvida).text = "Vida: ${MAXIMO_INTENTOS-adaptador.getIntento()}"
+                    if(adaptador.getIntento()>=MAXIMO_INTENTOS){
+                        Toast.makeText(this, "Perdiste", Toast.LENGTH_SHORT).show()
+                    }
+                    cartaClickeada.setActivo(true)
+                    adaptador.notifyDataSetChanged()
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        pareja!!.setActivo(false)
+                        cartaClickeada.setActivo(false)
+                        adaptador.notifyDataSetChanged()
+                        pareja = null
+                    }, 500)
                 }
             }
-        }
+
 
             adaptador.notifyDataSetChanged()
+
+
+        }
 
 
     }
@@ -142,6 +135,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             Toast.makeText(this, "Ganaste", Toast.LENGTH_SHORT).show()
         }
     }
+
 
 
 }

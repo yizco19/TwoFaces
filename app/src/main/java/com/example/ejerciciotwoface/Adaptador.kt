@@ -15,6 +15,7 @@ class Adaptador(
     private var elementosAnimal:ArrayList<Carta>
     private var elementosComida:ArrayList<Carta>
     private var elementosLogo:ArrayList<Carta>
+    private var elementosMario:ArrayList<Carta>
     private var pareja:Carta?=null
     private var intento=0
 
@@ -23,6 +24,7 @@ class Adaptador(
         elementosAnimal= ArrayList()
         elementosComida= ArrayList()
         elementosLogo= ArrayList()
+        elementosMario= ArrayList()
 
         var i=0
         //bucle de animal usando imagenesAnimales
@@ -48,6 +50,14 @@ class Adaptador(
             run {
                 elementosLogo.add(Carta( i, it))
                 elementosLogo.add(Carta( i, it))
+                i++
+            }
+        }
+        i=0
+        Imagenes.imagenesMario.forEach {
+            run {
+                elementosMario.add(Carta( i, it))
+                elementosMario.add(Carta( i, it))
                 i++
             }
         }
@@ -78,6 +88,8 @@ class Adaptador(
         lateinit var item:Carta
         init {
             imagen = view.findViewById(R.id.imagenView)
+
+
             imagen.setOnClickListener {
                 listener.onCartaClick(adapterPosition)
             }
@@ -111,27 +123,12 @@ class Adaptador(
         return elementos[position].hashCode().toLong()
     }
 
-    fun setAnimal() {
-        elementos=elementosAnimal
-        reiniciar()
-        this.notifyDataSetChanged()
-    }
-
-    fun setComida() {
-        elementos=elementosComida
-        reiniciar()
-        this.notifyDataSetChanged()
-    }
-    fun setMarcas() {
-        elementos=elementosLogo
-        reiniciar()
-        this.notifyDataSetChanged()
-    }
 
     fun reiniciar() {
         desordenar(elementos)
         pareja=null
         intento=0
+
         elementos.stream().forEach{it.restart()}
         this.notifyDataSetChanged()
 
@@ -147,6 +144,18 @@ class Adaptador(
 
     fun getIntento(): Int {
         return intento
+    }
+
+    fun setData(s: String) {
+        when (s) {
+            "Animal" ->         elementos=elementosAnimal
+            "Comida" ->         elementos=elementosComida
+            "Logo" ->           elementos=elementosLogo
+            "Mario" ->          elementos=elementosMario
+            else ->             desordenar(elementos)
+        }
+        reiniciar()
+        this.notifyDataSetChanged()
     }
 
 

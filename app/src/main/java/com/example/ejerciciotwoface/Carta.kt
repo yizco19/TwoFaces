@@ -39,12 +39,7 @@ class Carta  {
         this.imagen = imagen
     }
     fun getImagenActual(): Int {
-
-        if(this.descubierto || this.activo) {
-            return this.imagen
-        }else{
-            return R.drawable.cartatrasera
-        }
+        return (if (this.activo) this.imagen else R.drawable.cartatrasera)
     }
 
 
